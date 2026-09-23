@@ -91,6 +91,7 @@ def make_handler(state: _State) -> type[BaseHTTPRequestHandler]:
             if ctype.startswith("text/html"):
                 self.send_header("Content-Security-Policy",
                                  "default-src 'self'; style-src 'self' https://fonts.googleapis.com; "
+                                 "style-src-attr 'unsafe-inline'; "
                                  "font-src https://fonts.gstatic.com; img-src 'self' data:")
             self.end_headers()
             if self.command != "HEAD":

@@ -4,7 +4,7 @@ build-backend = "hatchling.build"
 
 [project]
 name = "agentposture"
-version = "1.0.0"
+version = "1.0.1"
 description = "Find every AI agent in your organization and know how risky each one is."
 readme = "README.md"
 license = "Apache-2.0"

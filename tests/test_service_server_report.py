@@ -100,6 +100,7 @@ def test_server_reads_and_dashboard(server):
     assert json.loads(get(server + "/api/agents/refund-assistant")[2])["agent"]["id"] == "refund-assistant"
     status, headers, body = get(server + "/")
     assert b"AgentPosture" in body and "default-src 'self'" in headers["Content-Security-Policy"]
+    assert "style-src-attr 'unsafe-inline'" in headers["Content-Security-Policy"]  # charts use inline styles
     assert get(server + "/app.js")[0] == 200
     with pytest.raises(urllib.error.HTTPError) as e:
         get(server + "/../pyproject.toml")
