@@ -17,7 +17,7 @@ inputs:
 runs:
   using: composite
   steps:
-    - uses: actions/setup-python@v5
+    - uses: actions/setup-python@v7
       with: {python-version: "3.12"}
     - shell: bash
       run: pip install --quiet "agentposture @ git+https://github.com/${{ github.action_repository || 'xamitgupta/agentposture' }}@${{ inputs.version || github.action_ref || 'main' }}"
