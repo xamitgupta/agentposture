@@ -3,7 +3,7 @@
 ## Reporting a vulnerability
 
 Please do not open a public issue. Report privately through GitHub's
-[private vulnerability reporting](https://github.com/YOUR-GITHUB-USER/agentposture/security/advisories/new)
+[private vulnerability reporting](https://github.com/xamitgupta/agentposture/security/advisories/new)
 with steps to reproduce and the affected version.
 
 You can expect an acknowledgement within three business days and a fix or mitigation plan within

@@ -22,14 +22,14 @@ and [CSV export](examples/sample-dashboard/agents.csv) generated from the same d
 ## Try it in 60 seconds
 
 ```bash
-pipx install git+https://github.com/YOUR-GITHUB-USER/agentposture   # or: pip install agentposture
+pipx install git+https://github.com/xamitgupta/agentposture   # or: pip install agentposture
 agentposture demo                                                     # opens a sample organization on http://localhost:8484
 ```
 
 Or with Docker:
 
 ```bash
-git clone https://github.com/YOUR-GITHUB-USER/agentposture && cd agentposture
+git clone https://github.com/xamitgupta/agentposture && cd agentposture
 docker compose up                                                     # http://localhost:8484
 ```
 
@@ -135,7 +135,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - uses: YOUR-GITHUB-USER/agentposture@v1
+      - uses: xamitgupta/agentposture@v1
         with: {fail-on: high}
 ```
 

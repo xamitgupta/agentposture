@@ -20,6 +20,6 @@ runs:
     - uses: actions/setup-python@v5
       with: {python-version: "3.12"}
     - shell: bash
-      run: pip install --quiet "agentposture @ git+https://github.com/${{ github.action_repository || 'YOUR-GITHUB-USER/agentposture' }}@${{ inputs.version || github.action_ref || 'main' }}"
+      run: pip install --quiet "agentposture @ git+https://github.com/${{ github.action_repository || 'xamitgupta/agentposture' }}@${{ inputs.version || github.action_ref || 'main' }}"
     - shell: bash
       run: agentposture check ${{ inputs.paths }} --fail-on "${{ inputs.fail-on }}" --policy "${{ inputs.policy }}"

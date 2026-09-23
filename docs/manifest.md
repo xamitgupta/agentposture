@@ -8,7 +8,7 @@ Name the file `agent.yaml`, `agent.yml`, `<anything>.agent.yaml`, or `agents.yam
 completion add this first line:
 
 ```yaml
-# yaml-language-server: $schema=https://raw.githubusercontent.com/YOUR-GITHUB-USER/agentposture/main/schemas/agent-manifest.schema.json
+# yaml-language-server: $schema=https://raw.githubusercontent.com/xamitgupta/agentposture/main/schemas/agent-manifest.schema.json
 ```
 
 ## Minimal

@@ -6,7 +6,7 @@ AgentPosture easier to adopt is worth more than one that makes it do more.
 ## Set up
 
 ```bash
-git clone https://github.com/YOUR-GITHUB-USER/agentposture && cd agentposture
+git clone https://github.com/xamitgupta/agentposture && cd agentposture
 python -m venv .venv && . .venv/bin/activate
 make dev          # editable install with test and lint tools
 make test lint

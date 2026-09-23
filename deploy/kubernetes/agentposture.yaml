@@ -29,7 +29,7 @@ spec:
                         seccompProfile: {type: RuntimeDefault}}
       containers:
         - name: agentposture
-          image: ghcr.io/YOUR-GITHUB-USER/agentposture:latest
+          image: ghcr.io/xamitgupta/agentposture:latest
           args: ["-c", "/config/agentposture.yaml", "serve", "--host", "0.0.0.0"]
           ports: [{containerPort: 8484, name: http}]
           envFrom: [{secretRef: {name: agentposture-env}}]

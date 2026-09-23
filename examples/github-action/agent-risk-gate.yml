@@ -14,7 +14,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - uses: YOUR-GITHUB-USER/agentposture@v1
+      - uses: xamitgupta/agentposture@v1
         with:
           paths: .
           fail-on: high          # low | medium | high | critical

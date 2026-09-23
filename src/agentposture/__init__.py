@@ -2,4 +2,4 @@
 
 __version__ = "1.0.0"
 
-__repo__ = "https://github.com/YOUR-GITHUB-USER/agentposture"
+__repo__ = "https://github.com/xamitgupta/agentposture"

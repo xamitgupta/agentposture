@@ -1,6 +1,6 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "https://github.com/YOUR-GITHUB-USER/agentposture/schemas/agent-manifest.schema.json",
+  "$id": "https://github.com/xamitgupta/agentposture/schemas/agent-manifest.schema.json",
   "title": "AgentPosture agent manifest",
   "description": "Declares one AI agent (or, with `agents`, several). Add `# yaml-language-server: $schema=<url>` at the top of agent.yaml for editor completion.",
   "type": "object",

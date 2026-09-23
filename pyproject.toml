@@ -10,7 +10,7 @@ readme = "README.md"
 license = "Apache-2.0"
 license-files = ["LICENSE"]
 requires-python = ">=3.10"
-authors = [{ name = "AgentPosture contributors" }]
+authors = [{ name = "Amit Gupta" }]
 keywords = ["ai-agents", "ai-governance", "risk-assessment", "security", "grc", "inventory",
             "nist-ai-rmf", "owasp-llm", "mcp", "shadow-ai"]
 classifiers = [
@@ -38,10 +38,10 @@ dev = ["pytest>=8", "pytest-cov>=5", "ruff>=0.6", "build>=1.2"]
 agentposture = "agentposture.cli:main"
 
 [project.urls]
-Homepage = "https://github.com/YOUR-GITHUB-USER/agentposture"
-Documentation = "https://github.com/YOUR-GITHUB-USER/agentposture/tree/main/docs"
-Issues = "https://github.com/YOUR-GITHUB-USER/agentposture/issues"
-Changelog = "https://github.com/YOUR-GITHUB-USER/agentposture/blob/main/CHANGELOG.md"
+Homepage = "https://github.com/xamitgupta/agentposture"
+Documentation = "https://github.com/xamitgupta/agentposture/tree/main/docs"
+Issues = "https://github.com/xamitgupta/agentposture/issues"
+Changelog = "https://github.com/xamitgupta/agentposture/blob/main/CHANGELOG.md"
 
 [tool.hatch.build.targets.wheel]
 packages = ["src/agentposture"]
