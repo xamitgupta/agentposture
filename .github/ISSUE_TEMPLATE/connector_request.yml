@@ -1,0 +1,14 @@
+name: Connector request
+description: Ask for a new place AgentPosture should find agents.
+labels: [connector]
+body:
+  - type: input
+    id: platform
+    attributes: {label: Platform, placeholder: "e.g. Google Vertex AI Agent Builder"}
+    validations: {required: true}
+  - type: textarea
+    id: api
+    attributes: {label: How agents can be listed, description: API endpoints or docs, and the read-only permission needed.}
+  - type: textarea
+    id: facts
+    attributes: {label: What the platform knows about each agent, description: Tools, identity, guardrails, owners, exposure.}

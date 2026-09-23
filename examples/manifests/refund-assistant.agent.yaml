@@ -1,0 +1,36 @@
+# A customer-facing agent that can move money, with approval and full controls.
+apiVersion: agentposture/v1
+kind: Agent
+id: refund-assistant
+name: Refund Assistant
+description: Answers order questions and prepares refunds that a support lead approves.
+owner: priya.n@acme.example
+team: payments
+lifecycle: production
+business_impact: high
+autonomy: act_with_approval
+exposure: customer
+data:
+  sensitivity: confidential
+  types: [pii, financial]
+model: anthropic/claude-sonnet
+tools:
+  - name: lookup_order
+    action: read
+    system: orders-api
+  - name: issue_refund
+    action: irreversible
+    system: payments-api
+    requires_approval: true
+privileges:
+  - orders:read
+  - payments:refund:create
+controls:
+  kill_switch: true
+  audit_logging: true
+  input_guardrails: true
+  output_guardrails: true
+  rate_limit: true
+links:
+  aws_bedrock: arn:aws:bedrock:us-east-1:123456789012:agent/REFUND01
+  identity: arn:aws:iam::123456789012:role/refund-assistant

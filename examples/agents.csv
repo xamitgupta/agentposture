@@ -1,0 +1,4 @@
+id,name,owner,team,lifecycle,business_impact,autonomy,exposure,data_sensitivity,data_types,tools,kill_switch,audit_logging,input_guardrails,output_guardrails,rate_limit,human_approval,link_identity
+contract-redliner,Contract Redliner,ana.p@acme.example,legal,production,medium,recommend,internal,confidential,,read_contract;suggest_edits,yes,yes,yes,yes,,,
+candidate-screener,Candidate Screener,zoe.a@acme.example,people,production,high,recommend,partner,restricted,pii,read_resume;score_candidate,,yes,,,yes,,spn-candidate-screener
+invoice-matcher,Invoice Matcher,omar.f@acme.example,finance,production,high,act_with_approval,internal,confidential,financial,read_invoice;match_po;approve_payment,yes,yes,yes,yes,,approve_payment,

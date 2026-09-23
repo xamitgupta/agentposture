@@ -1,0 +1,55 @@
+# kubectl create namespace agentposture
+# kubectl -n agentposture create secret generic agentposture-env \
+#   --from-literal=AGENTPOSTURE_TOKEN=... --from-literal=GITHUB_TOKEN=...
+# kubectl -n agentposture create configmap agentposture-config --from-file=agentposture.yaml
+# kubectl -n agentposture apply -f deploy/kubernetes/agentposture.yaml
+#
+# SQLite needs exactly one writer: keep replicas at 1 with the Recreate strategy.
+# Put your SSO proxy (for example oauth2-proxy) or ingress auth in front of the Service.
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata: {name: agentposture-data}
+spec:
+  accessModes: [ReadWriteOnce]
+  resources: {requests: {storage: 1Gi}}
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata: {name: agentposture, labels: {app: agentposture}}
+spec:
+  replicas: 1
+  strategy: {type: Recreate}
+  selector: {matchLabels: {app: agentposture}}
+  template:
+    metadata: {labels: {app: agentposture}}
+    spec:
+      # For AWS, bind a read-only IAM role with IRSA or EKS Pod Identity on this service account.
+      serviceAccountName: default
+      securityContext: {runAsNonRoot: true, runAsUser: 10001, fsGroup: 10001,
+                        seccompProfile: {type: RuntimeDefault}}
+      containers:
+        - name: agentposture
+          image: ghcr.io/YOUR-GITHUB-USER/agentposture:latest
+          args: ["-c", "/config/agentposture.yaml", "serve", "--host", "0.0.0.0"]
+          ports: [{containerPort: 8484, name: http}]
+          envFrom: [{secretRef: {name: agentposture-env}}]
+          volumeMounts:
+            - {name: config, mountPath: /config, readOnly: true}
+            - {name: data, mountPath: /data}
+          readinessProbe: {httpGet: {path: /healthz, port: http}, periodSeconds: 10}
+          livenessProbe: {httpGet: {path: /healthz, port: http}, periodSeconds: 30}
+          resources:
+            requests: {cpu: 50m, memory: 128Mi}
+            limits: {memory: 512Mi}
+          securityContext: {allowPrivilegeEscalation: false, readOnlyRootFilesystem: true,
+                            capabilities: {drop: [ALL]}}
+      volumes:
+        - {name: config, configMap: {name: agentposture-config}}
+        - {name: data, persistentVolumeClaim: {claimName: agentposture-data}}
+---
+apiVersion: v1
+kind: Service
+metadata: {name: agentposture}
+spec:
+  selector: {app: agentposture}
+  ports: [{port: 80, targetPort: http}]

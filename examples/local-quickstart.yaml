@@ -1,0 +1,17 @@
+# Runs against the files in this examples/ folder with no credentials:
+#   agentposture -c examples/local-quickstart.yaml scan
+#   agentposture -c examples/local-quickstart.yaml serve
+version: 1
+organization: Acme Corp (examples)
+storage: {path: ./.agentposture/examples.db}
+sources:
+  - {name: manifests, type: manifest, paths: [manifests]}
+  - {name: spreadsheet, type: csv, path: agents.csv}
+  - name: registry
+    type: http_json
+    file: registry.json
+    items_path: data.items
+    id_field: slug
+    mapping: {name: display_name, owner: owner.email, team: owner.team,
+              autonomy: governance.autonomy, exposure: governance.audience}
+    links: {identity: runtime.service_principal}

@@ -1,0 +1,48 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>AgentPosture</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Crect x='1' y='9' width='2' height='6' fill='%235E8C6A'/%3E%3Crect x='5' y='6' width='2' height='9' fill='%23C9A227'/%3E%3Crect x='9' y='3' width='2' height='12' fill='%23D46B08'/%3E%3Crect x='13' y='1' width='2' height='14' fill='%23B42318'/%3E%3C/svg%3E">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Public+Sans:wght@400;500;600;700;800&display=swap">
+<link rel="stylesheet" href="styles.css">
+</head>
+<body>
+<a class="skip" href="#main">Skip to content</a>
+<header class="topbar">
+  <div class="brand">
+    <svg class="mark" viewBox="0 0 16 16" aria-hidden="true"><rect x="1" y="9" width="2" height="6"/><rect x="5" y="6" width="2" height="9"/><rect x="9" y="3" width="2" height="12"/><rect x="13" y="1" width="2" height="14"/></svg>
+    <span class="brand-name">AgentPosture</span>
+    <span class="org" id="org"></span>
+  </div>
+  <nav class="tabs" aria-label="Views">
+    <a href="#/posture" data-view="posture">Posture</a>
+    <a href="#/agents" data-view="agents">Agents</a>
+    <a href="#/sources" data-view="sources">Sources</a>
+  </nav>
+  <div class="scanbox">
+    <span class="freshness" id="freshness"></span>
+    <button class="btn" id="scan-btn" type="button">Scan now</button>
+  </div>
+</header>
+<div class="banner" id="banner" hidden></div>
+<main id="main" tabindex="-1">
+  <section id="view-posture" class="view" aria-labelledby="headline"></section>
+  <section id="view-agents" class="view" hidden></section>
+  <section id="view-sources" class="view" hidden></section>
+</main>
+<aside class="drawer" id="drawer" aria-hidden="true" aria-label="Agent detail">
+  <div class="drawer-inner" id="drawer-body"></div>
+</aside>
+<div class="scrim" id="scrim" hidden></div>
+<div class="tooltip" id="tooltip" role="status" hidden></div>
+<footer class="foot">
+  <span id="policy-line"></span>
+  <a id="docs-link" href="https://github.com/YOUR-GITHUB-USER/agentposture" rel="noopener">Documentation</a>
+</footer>
+<!--SNAPSHOT-->
+<script src="app.js"></script>
+</body>
+</html>

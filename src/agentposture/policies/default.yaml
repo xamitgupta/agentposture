@@ -1,0 +1,282 @@
+# AgentPosture default risk policy.
+#
+# Copy this file, change what you disagree with, and point `policy:` in
+# agentposture.yaml at your copy. Every assessment records the hash of the policy
+# that produced it, so changing the policy triggers a full reassessment.
+version: 1
+name: AgentPosture default policy
+
+# --------------------------------------------------------------------------
+# 1. Dimensions. Each is scored 0 (lowest risk) to 3 (highest risk).
+#    The weighted average becomes a 0-100 score.
+# --------------------------------------------------------------------------
+dimensions:
+  autonomy:         {weight: 22, unknown_level: 3}   # read_only, recommend, act_with_approval, autonomous
+  privilege:        {weight: 20, unknown_level: 2}   # none, read, write, admin; irreversible tools score 3
+  data_sensitivity: {weight: 18, unknown_level: 3}   # public, internal, confidential, restricted
+  exposure:         {weight: 15, unknown_level: 3}   # internal, partner, customer, public
+  business_impact:  {weight: 15, unknown_level: 2}   # low, medium, high, critical
+  ownership:        {weight: 10}                     # owner and team known, or not
+
+# Data types that raise data_sensitivity to at least this level.
+sensitive_data_types:
+  confidential: [pii, financial, source_code, biometric]
+  restricted: [phi, pci, credentials]
+
+# --------------------------------------------------------------------------
+# 1b. Controls. The dimensions give *inherent* risk. Controls that are in place
+#     and relevant to this agent reduce it to *residual* risk, by up to
+#     max_reduction percent. A control only counts where it applies, e.g.
+#     rate_limit only for public agents (see docs/scoring.md for the full list).
+# --------------------------------------------------------------------------
+controls:
+  max_reduction: 35
+  weights:
+    human_approval: 3      # every irreversible tool requires approval
+    kill_switch: 2         # agents that can act
+    audit_logging: 2       # agents that write or touch confidential data
+    input_guardrails: 2    # agents that take outside input
+    output_guardrails: 2   # agents that send sensitive data outside
+    rate_limit: 1          # public agents
+    sandboxed: 2           # agents that execute code
+
+# --------------------------------------------------------------------------
+# 2. Tiers from the residual score (a score >= the value lands in that tier).
+# --------------------------------------------------------------------------
+tiers:
+  critical: 70
+  high: 40
+  medium: 22
+
+# --------------------------------------------------------------------------
+# 3. Overrides: combinations that set a minimum tier regardless of the score.
+#    This is where "blast radius" lives: a few attributes together can be far
+#    riskier than the average suggests.
+# --------------------------------------------------------------------------
+overrides:
+  - id: autonomous-irreversible-external
+    description: Acts on its own, can do things that cannot be undone, and faces customers or the public.
+    min_tier: critical
+    when:
+      all:
+        - {attr: autonomy, is: autonomous}
+        - {attr: irreversible_actions, is: true}
+        - {attr: exposure, at_least: customer}
+
+  - id: autonomous-irreversible-restricted
+    description: Acts on its own with irreversible actions over restricted data.
+    min_tier: critical
+    when:
+      all:
+        - {attr: autonomy, is: autonomous}
+        - {attr: irreversible_actions, is: true}
+        - {attr: data_sensitivity, is: restricted}
+
+  - id: admin-privilege-acting
+    description: Holds admin or wildcard privileges and can act.
+    min_tier: high
+    when:
+      all:
+        - {attr: privilege_level, is: admin}
+        - {attr: autonomy, at_least: act_with_approval}
+
+  - id: restricted-data-public
+    description: Restricted data reachable from a public-facing agent.
+    min_tier: high
+    when:
+      all:
+        - {attr: data_sensitivity, is: restricted}
+        - {attr: exposure, is: public}
+
+  - id: shadow-agent-can-act
+    description: Nobody declared this agent and it can change things.
+    min_tier: high
+    when:
+      all:
+        - {attr: declared, is: false}
+        - {attr: privilege_level, at_least: write}
+
+  - id: hardcoded-credential
+    description: A model or cloud key is hardcoded in source.
+    min_tier: high
+    when: {attr: credential_type, is: hardcoded_key}
+
+# --------------------------------------------------------------------------
+# 4. Findings: specific, fixable problems shown to agent owners.
+#    `fix` describes the change that resolves the finding; AgentPosture rescores
+#    the agent with that change applied to tell the owner what tier they would reach.
+# --------------------------------------------------------------------------
+findings:
+  - id: AP-001
+    title: No accountable owner
+    severity: high
+    when: {attr: owner, missing: true}
+    detail: No person is recorded as owning {name}.
+    remediation: Add `owner:` (a person's email) and `team:` to the agent's manifest.
+    fix: {owner: assigned@example.com, team: assigned}
+    frameworks: [NIST AI RMF GV-2.1]
+
+  - id: AP-002
+    title: Undeclared (shadow) agent
+    severity: high
+    when: {attr: declared, is: false}
+    detail: "{name} was discovered in {sources_text} but nobody has declared it."
+    remediation: >-
+      Find the team running it and commit an agent.yaml next to its code, or shut it down.
+      Declaring it records business impact, data sensitivity and controls that discovery cannot see.
+    fix: {declared: true}
+    frameworks: [NIST AI RMF GV-1.6]
+
+  - id: AP-003
+    title: Running with more than it declares
+    severity: high
+    when: {attr: has_drift, is: true}
+    detail: "Observed behavior exceeds the declaration: {drift_text}."
+    remediation: >-
+      Either reduce the agent's real permissions and tools to what was declared, or update the
+      manifest so reviewers see the true scope.
+    fix: {has_drift: false}
+    frameworks: [NIST AI RMF MG-4.1, OWASP LLM06]
+
+  - id: AP-004
+    title: Irreversible actions without human approval
+    severity: critical
+    when: {attr: unapproved_irreversible_tools, not_empty: true}
+    detail: "{name} can call {unapproved_text} with no human approval step."
+    remediation: >-
+      Require approval for these tools (list them under controls.human_approval and enforce it in
+      the runtime), or replace them with reversible alternatives such as drafts or holds.
+    fix: {unapproved_irreversible_tools: [], autonomy: act_with_approval}
+    frameworks: [OWASP LLM06, NIST AI RMF MG-2.4]
+
+  - id: AP-005
+    title: No kill switch
+    severity: high
+    when:
+      all:
+        - {attr: autonomy, at_least: act_with_approval}
+        - {attr: controls.kill_switch, is_not: true}
+    detail: "{name} can take actions but there is no documented way to stop it immediately."
+    remediation: Add a feature flag or revocable credential that disables the agent in one step, and set controls.kill_switch.
+    fix: {controls.kill_switch: true}
+    frameworks: [NIST AI RMF MG-2.4]
+
+  - id: AP-006
+    title: Untrusted input without input guardrails
+    severity: high
+    when:
+      all:
+        - {attr: exposure, at_least: partner}
+        - {attr: controls.input_guardrails, is_not: true}
+    detail: "{name} takes input from outside the company without prompt-injection filtering."
+    remediation: Put an input filter or guardrail in front of the model and set controls.input_guardrails.
+    fix: {controls.input_guardrails: true}
+    frameworks: [OWASP LLM01]
+
+  - id: AP-007
+    title: Sensitive data can leave without output filtering
+    severity: high
+    when:
+      all:
+        - {attr: data_sensitivity, at_least: confidential}
+        - {attr: exposure, at_least: partner}
+        - {attr: controls.output_guardrails, is_not: true}
+    detail: "{name} handles {data_sensitivity} data and answers people outside the company unfiltered."
+    remediation: Add output filtering for sensitive data (PII, secrets) and set controls.output_guardrails.
+    fix: {controls.output_guardrails: true}
+    frameworks: [OWASP LLM02]
+
+  - id: AP-008
+    title: Actions are not audit logged
+    severity: medium
+    when:
+      all:
+        - {attr: controls.audit_logging, is_not: true}
+        - any:
+            - {attr: privilege_level, at_least: write}
+            - {attr: data_sensitivity, at_least: confidential}
+    detail: "There is no audit trail of what {name} does or reads."
+    remediation: Log every tool call with the principal, inputs and result to your central log store; set controls.audit_logging.
+    fix: {controls.audit_logging: true}
+    frameworks: [NIST AI RMF MG-4.1]
+
+  - id: AP-009
+    title: Admin or wildcard privileges
+    severity: high
+    when: {attr: privilege_level, is: admin}
+    detail: "{name} holds broad privileges: {privileges_text}."
+    remediation: Replace wildcard and admin grants with the specific actions the agent's tools need.
+    fix: {privilege_level: write}
+    frameworks: [OWASP LLM06]
+
+  - id: AP-010
+    title: Hardcoded credential in source
+    severity: critical
+    when: {attr: credential_type, is: hardcoded_key}
+    detail: "A model or cloud key is committed in {hardcoded_text}."
+    remediation: Revoke the key now, move it to a secrets manager, and add secret scanning to the repository.
+    fix: {credential_type: managed}
+    frameworks: [CWE-798, OWASP LLM02]
+
+  - id: AP-011
+    title: Long-lived client secret
+    severity: medium
+    when: {attr: credential_type, is: client_secret}
+    detail: "{name} authenticates with a static client secret."
+    remediation: Switch to workload identity federation, a managed identity, or a certificate with short rotation.
+    fix: {credential_type: federated}
+    frameworks: [NIST AI RMF MS-2.7]
+
+  - id: AP-012
+    title: Not seen recently
+    severity: medium
+    when: {attr: status, is: stale}
+    detail: "No source has seen {name} for {days_since_seen} days."
+    remediation: Confirm it was decommissioned and revoke its credentials, or fix the source that stopped reporting it.
+    fix: {status: active}
+    frameworks: [NIST AI RMF GV-1.7]
+
+  - id: AP-013
+    title: Deprecated but still running
+    severity: medium
+    when:
+      all:
+        - {attr: lifecycle, is: deprecated}
+        - {attr: status, is: active}
+    detail: "{name} is marked deprecated but is still active."
+    remediation: Finish decommissioning by disabling the agent and revoking its identity and keys.
+    fix: {status: stale}
+    frameworks: [NIST AI RMF GV-1.7]
+
+  - id: AP-014
+    title: Incomplete risk record
+    severity: medium
+    when: {attr: unknown_fields, not_empty: true}
+    detail: "Missing or unrecognized values for {unknown_text}; they are scored as high risk until filled in."
+    remediation: Add these fields to the agent's manifest. See docs/manifest.md for allowed values.
+    fix: {unknown_fields: []}
+    frameworks: [NIST AI RMF MP-1.1]
+
+  - id: AP-015
+    title: Public agent without rate limiting
+    severity: medium
+    when:
+      all:
+        - {attr: exposure, is: public}
+        - {attr: controls.rate_limit, is_not: true}
+    detail: "Anyone can drive unbounded usage and cost through {name}."
+    remediation: Add per-user and global rate limits and a spend cap; set controls.rate_limit.
+    fix: {controls.rate_limit: true}
+    frameworks: [OWASP LLM10]
+
+  - id: AP-016
+    title: Can execute code or shell commands
+    severity: high
+    when:
+      all:
+        - {attr: code_execution, is: true}
+        - {attr: controls.sandboxed, is_not: true}
+    detail: "{name} can run code or commands outside a sandbox."
+    remediation: Run code execution in an isolated sandbox with no network or credentials by default; set controls.sandboxed.
+    fix: {controls.sandboxed: true}
+    frameworks: [OWASP LLM05, OWASP LLM06]

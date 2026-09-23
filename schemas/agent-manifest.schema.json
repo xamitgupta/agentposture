@@ -1,0 +1,82 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/YOUR-GITHUB-USER/agentposture/schemas/agent-manifest.schema.json",
+  "title": "AgentPosture agent manifest",
+  "description": "Declares one AI agent (or, with `agents`, several). Add `# yaml-language-server: $schema=<url>` at the top of agent.yaml for editor completion.",
+  "type": "object",
+  "oneOf": [
+    {"$ref": "#/$defs/agent"},
+    {"type": "object", "required": ["agents"],
+     "properties": {"agents": {"type": "array", "items": {"$ref": "#/$defs/agent"}}}}
+  ],
+  "$defs": {
+    "agent": {
+      "type": "object",
+      "anyOf": [{"required": ["id"]}, {"required": ["name"]}],
+      "properties": {
+        "apiVersion": {"const": "agentposture/v1"},
+        "kind": {"const": "Agent"},
+        "id": {"type": "string", "description": "Stable unique id, e.g. refund-assistant."},
+        "name": {"type": "string"},
+        "description": {"type": "string"},
+        "owner": {"type": "string", "description": "Email of the accountable person."},
+        "team": {"type": "string"},
+        "lifecycle": {"enum": ["development", "staging", "production", "deprecated"]},
+        "business_impact": {"enum": ["low", "medium", "high", "critical"],
+                            "description": "Worst realistic outcome if this agent misbehaves."},
+        "autonomy": {"enum": ["read_only", "recommend", "act_with_approval", "autonomous"]},
+        "exposure": {"enum": ["internal", "partner", "customer", "public"],
+                     "description": "Who can send input to the agent."},
+        "data": {
+          "type": "object",
+          "properties": {
+            "sensitivity": {"enum": ["public", "internal", "confidential", "restricted"]},
+            "types": {"type": "array", "items": {"type": "string",
+                      "examples": ["pii", "phi", "pci", "financial", "credentials", "source_code", "biometric"]}}
+          }
+        },
+        "model": {"type": "string"},
+        "tools": {
+          "type": "array",
+          "items": {
+            "oneOf": [
+              {"type": "string"},
+              {"type": "object", "required": ["name"],
+               "properties": {
+                 "name": {"type": "string"},
+                 "action": {"enum": ["read", "write", "irreversible"]},
+                 "system": {"type": "string"},
+                 "requires_approval": {"type": "boolean"}
+               }}
+            ]
+          }
+        },
+        "privileges": {"type": "array", "items": {"type": "string"},
+                       "description": "Permissions held by the agent's identity, e.g. IAM actions or OAuth scopes."},
+        "controls": {
+          "type": "object",
+          "properties": {
+            "human_approval": {"oneOf": [{"type": "boolean"}, {"type": "array", "items": {"type": "string"}}]},
+            "kill_switch": {"type": "boolean"},
+            "audit_logging": {"type": "boolean"},
+            "input_guardrails": {"type": "boolean"},
+            "output_guardrails": {"type": "boolean"},
+            "rate_limit": {"type": "boolean"},
+            "sandboxed": {"type": "boolean"}
+          },
+          "additionalProperties": false
+        },
+        "links": {
+          "type": "object",
+          "description": "Join keys to records other sources discover.",
+          "properties": {
+            "repo": {"type": "string", "description": "owner/name"},
+            "identity": {"type": "string", "description": "Service principal / role / app id"},
+            "aws_bedrock": {"type": "string", "description": "Bedrock agent ARN"}
+          },
+          "additionalProperties": {"type": ["string", "array"]}
+        }
+      }
+    }
+  }
+}

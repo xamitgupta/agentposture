@@ -1,0 +1,12 @@
+# The smallest useful manifest: an internal, read-only assistant.
+id: research-copilot
+name: Research Copilot
+owner: tom.h@acme.example
+team: developer-experience
+lifecycle: production
+business_impact: low
+autonomy: recommend
+exposure: internal
+data: {sensitivity: internal}
+tools: [search_docs, summarize]
+controls: {audit_logging: true}

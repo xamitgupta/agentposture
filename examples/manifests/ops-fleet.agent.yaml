@@ -1,0 +1,27 @@
+# One file can declare several agents that ship together.
+agents:
+  - id: oncall-remediator
+    name: On-call Remediator
+    owner: arjun.m@acme.example
+    team: platform
+    lifecycle: production
+    business_impact: critical
+    autonomy: autonomous
+    exposure: internal
+    data: {sensitivity: confidential}
+    tools:
+      - {name: read_metrics, action: read}
+      - {name: restart_service, action: write}
+      - {name: run_command, action: irreversible}
+    controls: {kill_switch: true, audit_logging: true}
+
+  - id: cost-reporter
+    name: Cloud Cost Reporter
+    owner: nina.b@acme.example
+    team: platform
+    lifecycle: production
+    business_impact: low
+    autonomy: read_only
+    exposure: internal
+    data: {sensitivity: internal}
+    tools: [read_billing]

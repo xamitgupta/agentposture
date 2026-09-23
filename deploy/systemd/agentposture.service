@@ -1,0 +1,28 @@
+# /etc/systemd/system/agentposture.service
+#   sudo useradd --system --home /var/lib/agentposture agentposture
+#   sudo pip install "agentposture[aws]"
+#   sudo systemctl enable --now agentposture
+[Unit]
+Description=AgentPosture AI agent inventory and risk dashboard
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+User=agentposture
+Group=agentposture
+WorkingDirectory=/var/lib/agentposture
+EnvironmentFile=-/etc/agentposture/env
+ExecStart=/usr/local/bin/agentposture -c /etc/agentposture/agentposture.yaml serve
+Restart=on-failure
+RestartSec=5
+StateDirectory=agentposture
+NoNewPrivileges=true
+ProtectSystem=strict
+ProtectHome=true
+PrivateTmp=true
+ReadWritePaths=/var/lib/agentposture
+CapabilityBoundingSet=
+RestrictAddressFamilies=AF_INET AF_INET6 AF_UNIX
+
+[Install]
+WantedBy=multi-user.target

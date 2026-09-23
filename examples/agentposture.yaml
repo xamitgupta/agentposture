@@ -1,0 +1,74 @@
+# A realistic production configuration. Copy what you need.
+# Every secret is read from the environment; nothing sensitive lives in this file.
+version: 1
+organization: Acme Corp
+
+storage:
+  path: /var/lib/agentposture/agentposture.db
+
+server:
+  host: 0.0.0.0                        # behind your SSO proxy; see docs/deployment.md
+  port: 8484
+  api_token: env:AGENTPOSTURE_TOKEN    # required for scan, register and webhook calls
+  protect_reads: false                 # true = API reads need the token too
+
+policy: ./policy.yaml                  # `agentposture policy -o policy.yaml` to start from the default
+
+sources:
+  # Owners declare agents in agent.yaml files; the GitHub source reads them from every repo.
+  - name: github
+    type: github
+    org: acme
+    token: env:GITHUB_TOKEN
+    schedule: "0 */6 * * *"            # full sweep every 6 hours
+    trigger: webhook                   # plus an immediate rescan on every push
+    webhook_secret: env:GITHUB_WEBHOOK_SECRET
+
+  # Cloud agent platforms: what is actually running.
+  - name: aws-prod
+    type: aws_bedrock
+    regions: [us-east-1, us-west-2, eu-west-1]
+    schedule: "15 * * * *"             # hourly
+
+  # Identity: every agent that calls an API needs a principal.
+  - name: entra
+    type: entra_id
+    tenant_id: env:AZURE_TENANT_ID
+    client_id: env:AZURE_CLIENT_ID
+    client_secret: env:AZURE_CLIENT_SECRET
+    tag: AIAgent
+    schedule: "30 */4 * * *"
+
+  # An existing internal registry or Backstage catalog.
+  - name: platform-registry
+    type: http_json
+    url: https://registry.internal.acme.example/api/v2/agents
+    headers: {Authorization: env:REGISTRY_AUTH_HEADER}
+    items_path: data.items
+    next_path: data.next
+    id_field: slug
+    mapping:
+      name: display_name
+      owner: owner.email
+      team: owner.team
+      autonomy: governance.autonomy
+      exposure: governance.audience
+    links:
+      identity: runtime.service_principal
+    schedule: "0 * * * *"
+
+  # Bootstrapping: the spreadsheet your GRC team already has.
+  - name: legacy-inventory
+    type: csv
+    path: ./agents.csv
+    enabled: true
+    trigger: manual                    # only when someone presses Scan
+
+reassessment:
+  on_change: true
+  max_age_by_tier: {critical: 1d, high: 3d, medium: 30d, low: 90d}
+  stale_after: 7d
+
+dashboard:
+  refresh: 5m
+  history_days: 365

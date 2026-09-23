@@ -1,0 +1,12 @@
+.git
+.github
+**/__pycache__
+**/*.pyc
+.venv
+*.db
+*.db-*
+dist
+build
+tests
+examples
+docs

@@ -1,0 +1,21 @@
+# .github/workflows/agent-risk-gate.yml
+# Fails a pull request if any agent.yaml in the repository scores at or above the chosen tier,
+# and prints each finding with its fix. Put this in the repositories where agents live.
+name: Agent risk gate
+on:
+  pull_request:
+    paths: ["**/agent.yaml", "**/*.agent.yaml", "**/agents.yaml"]
+
+permissions:
+  contents: read
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: YOUR-GITHUB-USER/agentposture@v1
+        with:
+          paths: .
+          fail-on: high          # low | medium | high | critical
+          # policy: .github/agentposture-policy.yaml

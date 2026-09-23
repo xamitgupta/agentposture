@@ -1,0 +1,28 @@
+{
+  "data": {
+    "items": [
+      {
+        "slug": "sales-email-writer",
+        "display_name": "Sales Email Writer",
+        "owner": {"email": "sam.o@acme.example", "team": "growth"},
+        "governance": {"autonomy": "advisory", "audience": "employees"},
+        "runtime": {"service_principal": "4b1c2f9e-sales-writer"},
+        "business_impact": "low",
+        "data_sensitivity": "internal",
+        "tools": ["crm_lookup"]
+      },
+      {
+        "slug": "lead-enrichment-agent",
+        "display_name": "Lead Enrichment Agent",
+        "owner": {"email": "sam.o@acme.example", "team": "growth"},
+        "governance": {"autonomy": "fully_autonomous", "audience": "employees"},
+        "runtime": {"service_principal": "77aa01de-lead-enrichment"},
+        "business_impact": "medium",
+        "data_sensitivity": "confidential",
+        "data_types": ["pii"],
+        "tools": ["web_search", "update_crm_record"]
+      }
+    ],
+    "next": null
+  }
+}

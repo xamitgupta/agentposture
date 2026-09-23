@@ -1,0 +1,17 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project]
+name = "agentposture-servicenow"
+version = "0.1.0"
+description = "Example AgentPosture connector for ServiceNow"
+requires-python = ">=3.10"
+dependencies = ["agentposture>=1.0"]
+
+# This entry point is all AgentPosture needs to discover the connector.
+[project.entry-points."agentposture.connectors"]
+servicenow = "agentposture_servicenow:ServiceNowConnector"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/agentposture_servicenow"]

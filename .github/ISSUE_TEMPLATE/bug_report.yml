@@ -1,0 +1,18 @@
+name: Bug report
+description: Something does not work as documented.
+labels: [bug]
+body:
+  - type: textarea
+    id: what
+    attributes: {label: What happened, description: Include the command you ran and its output.}
+    validations: {required: true}
+  - type: textarea
+    id: expected
+    attributes: {label: What you expected}
+  - type: input
+    id: version
+    attributes: {label: Version, description: Output of `agentposture --version`}
+    validations: {required: true}
+  - type: textarea
+    id: config
+    attributes: {label: Relevant configuration, description: Remove secrets, hostnames and anything internal., render: yaml}

@@ -1,0 +1,24 @@
+# Quick start:   docker compose up        then open http://localhost:8484
+# It runs the built-in demo until you mount your own config (see the commented lines).
+services:
+  agentposture:
+    build: .
+    image: agentposture:latest
+    ports: ["127.0.0.1:8484:8484"]
+    command: ["demo", "--host", "0.0.0.0", "--port", "8484", "--dir", "/data"]
+    # For real use, replace `command` with the default and mount your config:
+    # command: ["-c", "/config/agentposture.yaml", "serve", "--host", "0.0.0.0"]
+    # volumes:
+    #   - ./agentposture.yaml:/config/agentposture.yaml:ro
+    #   - ./manifests:/config/manifests:ro
+    #   - agentposture-data:/data
+    # environment:
+    #   AGENTPOSTURE_TOKEN: ${AGENTPOSTURE_TOKEN}
+    #   GITHUB_TOKEN: ${GITHUB_TOKEN}
+    restart: unless-stopped
+    read_only: true
+    tmpfs: [/tmp]
+    volumes:
+      - agentposture-data:/data
+volumes:
+  agentposture-data:
