@@ -1,11 +1,11 @@
 # Small, non-root image: Python + PyYAML (+ boto3 for the AWS connector).
-FROM python:3.12-slim AS build
+FROM python:3.14-slim AS build
 WORKDIR /src
 COPY pyproject.toml README.md LICENSE CHANGELOG.md ./
 COPY src ./src
 RUN pip install --no-cache-dir build && python -m build --wheel --outdir /dist
 
-FROM python:3.12-slim
+FROM python:3.14-slim
 LABEL org.opencontainers.image.title="AgentPosture" \
       org.opencontainers.image.description="Find every AI agent in your organization and know how risky each one is." \
       org.opencontainers.image.licenses="Apache-2.0"
